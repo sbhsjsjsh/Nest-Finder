@@ -1,0 +1,6 @@
+{
+  "name": "Mumbai Nest Finder",
+  "description": "A luxury property finding service for dream homes across Mumbai.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

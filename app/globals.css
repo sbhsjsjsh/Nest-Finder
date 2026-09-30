@@ -1,0 +1,91 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-background: #FDFCFB;
+  --color-foreground: #1A1A1A;
+  --color-primary: #C5A059;
+  --color-primary-foreground: #FFFFFF;
+  --color-accent: #1A1A1A;
+  --color-muted: #F5F5F0;
+  --color-muted-foreground: #666666;
+  --color-border: rgba(0,0,0,0.08);
+
+  --font-serif: "Instrument Serif", serif;
+  --font-sans: "Satoshi", "Plus Jakarta Sans", sans-serif;
+
+  --animate-spin-slow: spin 8s linear infinite;
+  --animate-glow: glow 4s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.5; filter: blur(20px); }
+  50% { opacity: 0.8; filter: blur(40px); }
+}
+
+@layer utilities {
+  .glow-border-container {
+    @apply relative overflow-hidden;
+  }
+  
+  .glow-border-effect {
+    @apply absolute -inset-[2px] rounded-[inherit] z-0 pointer-events-none overflow-hidden opacity-0 transition-opacity duration-500;
+  }
+
+  .glow-border-container:hover .glow-border-effect {
+    @apply opacity-100;
+  }
+
+  .glow-spinning-bg {
+    @apply absolute inset-[-100%] animate-spin-slow;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 120deg,
+      var(--color-primary) 180deg,
+      transparent 240deg,
+      transparent 360deg
+    );
+  }
+
+  .glow-overlay {
+    @apply absolute inset-[1px] bg-inherit rounded-[inherit] z-[1];
+  }
+
+  .glow-content {
+    @apply relative z-10;
+  }
+
+  .shimmer-text {
+    @apply relative overflow-hidden;
+    background: linear-gradient(
+      to right,
+      #ffffff 20%,
+      #ffd700 50%,
+      #ffffff 80%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+
+  @keyframes shimmer {
+    to { background-position: 200% center; }
+  }
+
+  .stunning-button {
+    @apply relative overflow-hidden transition-all duration-500 shadow-[0_0_20px_rgba(197,160,89,0.3)] hover:shadow-[0_0_60px_rgba(197,160,89,0.8)] hover:scale-105 active:scale-95;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* Custom Serif Font Import - Fallback to standard serif if not loaded */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap');

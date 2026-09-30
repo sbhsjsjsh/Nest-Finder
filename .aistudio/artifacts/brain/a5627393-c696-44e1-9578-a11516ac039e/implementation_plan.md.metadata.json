@@ -1,0 +1,6 @@
+{
+  "summary": "Implementation plan for Mumbai Nest Finder landing page. Features a luxury visual aesthetic, a multi-step property requirement wizard, and high-fidelity Mumbai real estate imagery. Following user preference, Firebase is excluded, and lead capture will be handled via server-side logic.",
+  "updatedAt": "2026-09-30T13:22:32.591319360Z",
+  "requestFeedback": true,
+  "userFacing": true
+}
