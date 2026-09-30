@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { leadsCollection } from '@/lib/firebase-admin';
+
+// Note: This is an in-memory store. 
+// Leads will reset if the server restarts.
+let leads: any[] = [];
 
 export async function GET(req: NextRequest) {
-  try {
-    const snapshot = await leadsCollection.orderBy('timestamp', 'desc').get();
-    const leads = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    return NextResponse.json(leads);
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to fetch leads' }, { status: 500 });
-  }
+  return NextResponse.json(leads);
 }
 
 export async function POST(req: NextRequest) {
@@ -19,21 +13,22 @@ export async function POST(req: NextRequest) {
     const lead = await req.json();
     const newLead = {
       ...lead,
+      id: Date.now().toString(),
       timestamp: new Date().toISOString(),
     };
-    await leadsCollection.add(newLead);
+    leads.unshift(newLead); // Add to the beginning
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to save lead' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Invalid data' }, { status: 400 });
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
     const { id } = await req.json();
-    await leadsCollection.doc(id).delete();
+    leads = leads.filter(l => l.id !== id);
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to delete lead' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Invalid data' }, { status: 400 });
   }
 }
