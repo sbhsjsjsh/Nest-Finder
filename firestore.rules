@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidLead(data) {
+      return data.name is string && data.name.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             data.phone is string && data.phone.matches('^[0-9]{10}$') &&
+             data.propertyType in ['Apartment', 'Villa / Bungalow', 'Office Space', 'Shop / Showroom', 'Land / Plot'] &&
+             data.budget is string && data.budget.size() <= 50 &&
+             data.locality is string && data.locality.size() <= 100 &&
+             data.purpose in ['Self Use', 'Investment'] &&
+             data.timestamp is string;
+    }
+
+    match /leads/{leadId} {
+      // Allow public creation with strict validation
+      allow create: if isValidLead(incoming());
+      
+      // Allow read/delete ONLY if via the admin API (server-side bypass) 
+      // or if we had a specific admin UID. Since we use a proxy API,
+      // we can keep these denied for client SDK access.
+      allow read, delete: if false; 
+    }
+  }
+}
