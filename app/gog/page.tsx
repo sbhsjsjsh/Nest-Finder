@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
-import { Lock, Table as TableIcon, RefreshCcw, ArrowLeft, Phone, Mail, Calendar, MapPin } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Lock, Table as TableIcon, RefreshCcw, ArrowLeft, Phone, Mail, Calendar, MapPin, Trash2, AlertCircle, X, Check } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +12,7 @@ export default function LeadsDashboard() {
   const [error, setError] = React.useState('')
   const [leads, setLeads] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = React.useState<string | null>(null)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +34,22 @@ export default function LeadsDashboard() {
       console.error('Failed to fetch leads')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+      if (res.ok) {
+        setLeads(leads.filter(l => l.id !== id))
+        setDeleteConfirmId(null)
+      }
+    } catch (err) {
+      console.error('Failed to delete lead')
     }
   }
 
@@ -110,71 +127,106 @@ export default function LeadsDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto p-4 md:p-8">
-        {leads.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-border">
-            <p className="text-muted-foreground italic">No inquiries found yet.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-3xl border border-border shadow-xl shadow-black/5 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-muted/30 border-b border-border">
-                    <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Inquiry Details</th>
-                    <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-muted-foreground hidden md:table-cell">Requirements</th>
-                    <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-muted-foreground hidden lg:table-cell">Contact</th>
-                    <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-muted-foreground text-right">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {leads.map((lead) => (
-                    <tr key={lead.id} className="hover:bg-muted/10 transition-colors group">
-                      <td className="p-4">
-                        <div className="font-bold text-foreground">{lead.name}</div>
-                        <div className="text-xs text-primary mt-1 md:hidden">{lead.phone}</div>
-                        <div className="text-[10px] text-muted-foreground mt-1 flex flex-wrap gap-2 md:hidden">
-                          <span className="bg-muted px-2 py-0.5 rounded">{lead.propertyType}</span>
-                          <span className="bg-muted px-2 py-0.5 rounded">{lead.budget}</span>
-                        </div>
-                      </td>
-                      <td className="p-4 hidden md:table-cell">
-                        <div className="space-y-1">
-                          <div className="text-sm font-medium flex items-center gap-2">
-                             <span className="text-xs px-2 py-0.5 bg-primary/5 text-primary rounded-md">{lead.propertyType}</span>
-                             {lead.bhk && <span className="text-xs px-2 py-0.5 bg-primary/5 text-primary rounded-md">{lead.bhk}</span>}
-                          </div>
-                          <div className="text-xs text-muted-foreground flex items-center gap-2">
-                             <MapPin className="w-3 h-3" /> {lead.locality} · {lead.budget}
-                          </div>
-                          <div className="text-[10px] text-muted-foreground italic">Purpose: {lead.purpose}</div>
-                        </div>
-                      </td>
-                      <td className="p-4 hidden lg:table-cell">
-                        <div className="space-y-1 text-sm">
-                          <div className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer">
-                            <Phone className="w-3 h-3" /> {lead.phone}
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Mail className="w-3 h-3" /> {lead.email}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="text-sm font-medium">{new Date(lead.timestamp).toLocaleDateString()}</div>
-                        <div className="text-[10px] text-muted-foreground flex items-center justify-end gap-1">
-                          <Calendar className="w-3 h-3" /> {new Date(lead.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="space-y-6">
+          {leads.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-border">
+              <p className="text-muted-foreground italic">No inquiries found yet.</p>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              <AnimatePresence mode="popLayout">
+                {leads.map((lead) => (
+                  <motion.div
+                    key={lead.id}
+                    layout
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="bg-white rounded-[1.5rem] border border-border p-5 md:p-6 shadow-sm hover:shadow-md transition-all group relative"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      {/* Left: Lead Identity */}
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary font-bold">
+                             {lead.name.charAt(0)}
+                           </div>
+                           <div>
+                             <h3 className="font-bold text-lg text-foreground">{lead.name}</h3>
+                             <div className="text-xs text-muted-foreground flex items-center gap-1">
+                               <Calendar className="w-3 h-3" />
+                               {new Date(lead.timestamp).toLocaleDateString()} at {new Date(lead.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                             </div>
+                           </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 bg-muted rounded-md">{lead.propertyType}</span>
+                          <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 bg-primary/10 text-primary rounded-md">{lead.budget}</span>
+                          {lead.bhk && <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 bg-muted rounded-md">{lead.bhk}</span>}
+                        </div>
+                      </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                      {/* Middle: Details List */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-[1.5]">
+                        <div className="space-y-2">
+                           <div className="flex items-center gap-2 text-sm">
+                             <Phone className="w-4 h-4 text-primary" />
+                             <span className="font-medium">{lead.phone}</span>
+                           </div>
+                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                             <Mail className="w-4 h-4 text-primary" />
+                             <span>{lead.email}</span>
+                           </div>
+                        </div>
+                        <div className="space-y-2">
+                           <div className="flex items-center gap-2 text-sm">
+                             <MapPin className="w-4 h-4 text-primary" />
+                             <span className="font-medium">{lead.locality}</span>
+                           </div>
+                           <div className="text-xs text-muted-foreground italic">
+                             Purpose: {lead.purpose}
+                           </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Actions */}
+                      <div className="flex items-center justify-end">
+                        {deleteConfirmId === lead.id ? (
+                          <div className="flex items-center gap-2 bg-red-50 p-2 rounded-xl animate-in fade-in slide-in-from-right-2">
+                            <span className="text-[10px] font-bold text-red-600 px-2">Delete Inquiry?</span>
+                            <button 
+                              onClick={() => handleDelete(lead.id)}
+                              className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => setDeleteConfirmId(null)}
+                              className="bg-white border border-border p-2 rounded-lg hover:bg-muted transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => setDeleteConfirmId(lead.id)}
+                            className="p-3 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-all rounded-xl opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center justify-center gap-2">
+            <AlertCircle className="w-3 h-3" /> 
             Data refreshes automatically on server restart
           </p>
         </div>

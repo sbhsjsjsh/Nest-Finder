@@ -24,3 +24,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Invalid data' }, { status: 400 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { id } = await req.json();
+    leads = leads.filter(l => l.id !== id);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Invalid data' }, { status: 400 });
+  }
+}
