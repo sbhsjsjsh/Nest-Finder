@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Lock, Table as TableIcon, RefreshCcw, ArrowLeft, Phone, Mail, Calendar, MapPin, Trash2, AlertCircle, X, Check } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -28,10 +28,12 @@ export default function LeadsDashboard() {
     setLoading(true)
     try {
       const res = await fetch('/api/leads')
+      if (!res.ok) throw new Error('Fetch failed')
       const data = await res.json()
-      setLeads(data)
+      setLeads(Array.isArray(data) ? data : [])
     } catch (err) {
-      console.error('Failed to fetch leads')
+      console.error('Failed to fetch leads', err)
+      setLeads([])
     } finally {
       setLoading(false)
     }
@@ -149,13 +151,14 @@ export default function LeadsDashboard() {
                       <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary font-bold">
-                             {lead.name.charAt(0)}
+                             {lead.name?.charAt(0) || '?'}
                            </div>
                            <div>
-                             <h3 className="font-bold text-lg text-foreground">{lead.name}</h3>
+                             <h3 className="font-bold text-lg text-foreground">{lead.name || 'Anonymous'}</h3>
                              <div className="text-xs text-muted-foreground flex items-center gap-1">
                                <Calendar className="w-3 h-3" />
-                               {new Date(lead.timestamp).toLocaleDateString()} at {new Date(lead.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                               {lead.timestamp ? new Date(lead.timestamp).toLocaleDateString() : 'Unknown Date'}
+                               {lead.timestamp && ` at ${new Date(lead.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
                              </div>
                            </div>
                         </div>

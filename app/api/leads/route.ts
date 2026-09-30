@@ -9,8 +9,13 @@ export async function GET(req: NextRequest) {
       ...doc.data()
     }));
     return NextResponse.json(leads);
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to fetch leads' }, { status: 500 });
+  } catch (error: any) {
+    console.error('CRITICAL API ERROR (GET):', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Failed to fetch leads',
+      details: error?.message || 'Unknown error'
+    }, { status: 500 });
   }
 }
 
@@ -23,8 +28,9 @@ export async function POST(req: NextRequest) {
     };
     await leadsCollection.add(newLead);
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to save lead' }, { status: 400 });
+  } catch (error: any) {
+    console.error('CRITICAL API ERROR (POST):', error);
+    return NextResponse.json({ success: false, error: 'Failed to save lead', details: error?.message }, { status: 400 });
   }
 }
 
@@ -33,7 +39,8 @@ export async function DELETE(req: NextRequest) {
     const { id } = await req.json();
     await leadsCollection.doc(id).delete();
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to delete lead' }, { status: 400 });
+  } catch (error: any) {
+    console.error('CRITICAL API ERROR (DELETE):', error);
+    return NextResponse.json({ success: false, error: 'Failed to delete lead', details: error?.message }, { status: 400 });
   }
 }
