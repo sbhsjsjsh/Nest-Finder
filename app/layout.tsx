@@ -19,6 +19,10 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <link rel="preconnect" href="https://tally.so" />
+        <link rel="preconnect" href="https://tally.so" crossOrigin="anonymous" />
+      </head>
       <body suppressHydrationWarning>{children}</body>
     </html>
   );
